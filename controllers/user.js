@@ -1,45 +1,47 @@
 'use strict'
 
-const User = require('../models/user')
-const passport = require('passport')
+const User = require('../models/user');
+const HttpStatus = require('http-status-codes');
+const UserService = require('../services/user');
 
-function signUp (req, res, next) {
-  const user = new User({
-    username: req.body.user.username,
-    email: req.body.user.email,
-    phone: req.body.user.phone,
-    password: req.body.user.password
-  })
+async function signUp (req, res) {
+  try {
+    const user = new User({
+      name: req.body.name,
+      lastname: req.body.lastname,
+      email: req.body.email,
+      password: req.body.password
+    })
+  
+    let userSaved = await UserService.create(user);
 
-  user.save((err) => {
-    if (err) res.status(500).send({ message: `Error al crear el usuario: ${err}` })
-
-    return res.status(200).send({ user: user.toAuthJSON() })
-  })
+    res.status(HttpStatus.OK).send({ message: 'El usuario ha sido creado correctamente!' });
+  }
+  catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al crear el usuario: ${err.message}`});
+  }
 }
 
-function signIn (req, res, next) {
-  if(!req.body.user.email){
-    return res.status(422).send({ errors: {email: 'No puede estar vacío'} })
-  }
-
-  if(!req.body.user.password){
-    return res.status(422).send({ errors: {password: 'No puede estar vacía'} })
-  }
-
-  passport.authenticate('local', {session: false}, (err, user, info) => {
-    if(err){ return next(err) }
-
-    if(user){
-      user.token = user.generateJWT()
-      return res.status(200).send({
-        message: 'Logueado correctamente',
-        user: user.toAuthJSON()
-      })
-    } else {
-      return res.status(422).send(info)
+async function signIn (req, res) {
+  try {
+    if(!req.body.email){
+      return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ errors: {email: 'No puede estar vacío'} })
     }
-  })(req, res, next)
+  
+    if(!req.body.password){
+      return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ errors: {password: 'No puede estar vacía'} })
+    }    
+
+    let user = await UserService.authenticate(req.body);
+
+    if (user) {
+      return res.status(HttpStatus.OK).send({ user: user });
+    } else {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Nombre de usuario o contraseña incorrectas'});
+    }    
+  } catch (err) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer iniciar sesión: ${err.message}`});
+  }
 }
 
 function getUser(req, res, next){
