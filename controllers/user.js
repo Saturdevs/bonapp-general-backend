@@ -10,7 +10,8 @@ async function signUp (req, res) {
       name: req.body.name,
       lastname: req.body.lastname,
       email: req.body.email,
-      password: req.body.password
+      password: req.body.password,
+      roleId: req.body.roleId
     })
   
     let userSaved = await UserService.create(user);
@@ -54,6 +55,15 @@ function getUser(req, res, next){
   }).catch(next)
 }
 
+function getUserByEmail(req, res, next){
+  User.find({email: req.email}, (err, user) => {
+    if(!user) {
+      return res.status(200).send( {user: null })
+    }
+    return res.status(200).send( {user: user.toAuthJSON() })
+  }).catch(next)
+}
+
 function updateUser(req, res){
   let userId = req.payload.id
   let bodyUpdate = req.body
@@ -70,5 +80,6 @@ module.exports = {
   signUp,
   signIn,
   getUser,
-  updateUser
+  updateUser,
+  getUserByEmail
 }

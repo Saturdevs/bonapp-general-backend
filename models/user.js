@@ -9,8 +9,11 @@ const userSchema = Schema({
   lastname: { type: String, required: true },
   email: {type: String, lowercase: true, required: [true, "can't be blank"], match: [/\S+@\S+\.\S+/, 'is invalid'], index: true, unique: true},
   phone: { type: String },  
-  password: { type: String, required: true },
-  salt: { type: String }
+  salt: { type: String },
+  facebookId: { type: String },
+  googleId: { type: String },
+  password: { type: String, required: function() { return this.facebookId == null && this.googleId == null; } },
+  roleId:  { type: String, required: true },
 }, {timestamps: true});
 
 userSchema.pre('save', function (next) {
