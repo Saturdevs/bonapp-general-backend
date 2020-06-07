@@ -12,7 +12,7 @@ const userSchema = Schema({
   salt: { type: String },
   facebookId: { type: String },
   googleId: { type: String },
-  password: { type: String, required: function() { return this.facebookId == null && this.googleId == null; } },
+  password: { type: String },
   roleId:  { type: String, required: true },
 }, {timestamps: true});
 

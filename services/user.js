@@ -20,6 +20,19 @@ async function authenticate({ email, password }) {
   }
 }
 
+
+async function authenticateWithoutPass(email) {
+  let query = { email: email };    
+  const user = await UserDAO.getUserByQuery(query);
+  if (user) {
+    const {...userWithoutHash } = user.toObject();
+    const token = await generateJWT(user);
+    return {
+      ...userWithoutHash,
+      token
+    };
+  }
+}
 /**
  * @description Genera el token para el usuario dado como parametro.
  * @param {User} user 
@@ -64,5 +77,6 @@ async function deleteUser(user) {
 module.exports = {
   authenticate,
   create,
-  deleteUser
+  deleteUser,
+  authenticateWithoutPass
 }
