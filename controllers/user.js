@@ -64,7 +64,7 @@ async function signInWithoutPass(req, res) {
   }
 }
 
-function getUser(req, res, next) {
+async function getUser(req, res, next) {
   try{
     if(!req.params.userId){
       return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ errors: { userId: 'No puede estar vacío' } })
