@@ -9,7 +9,7 @@ const passport = require('passport')
 userRouter.post('/signup', userCtrl.signUp)
 userRouter.post('/signin', userCtrl.signIn)
 userRouter.post('/signinWithoutPass', userCtrl.signInWithoutPass)
-userRouter.get('/', auth.required, userCtrl.getUser)
+userRouter.get('/:userId', auth.required, userCtrl.getUser)
 userRouter.get('/userByEmal/:email', userCtrl.getUserByEmail)
 userRouter.put('/', userCtrl.updateUser)
 

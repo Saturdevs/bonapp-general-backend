@@ -49,6 +49,19 @@ async function generateJWT(user) {
   return jwt.sign(payload, config.SECRET_TOKEN)
 }
 
+async function findByIdAndRetrieveToken(userId){
+  const user = await UserDAO.getById(userId);
+  
+  if(user){
+    const {...userWithoutHash } = user.toObject();
+    const token = await generateJWT(user);
+    return {
+      ...userWithoutHash,
+      token
+    };
+  }
+}
+
 /**
  * @description Crea un nuevo usuario y lo guarda en la base de datos.
  * @param {JSON} userParam datos con los que se va a crear el nuevo usuario.
@@ -78,5 +91,6 @@ module.exports = {
   authenticate,
   create,
   deleteUser,
-  authenticateWithoutPass
+  authenticateWithoutPass,
+  findByIdAndRetrieveToken
 }

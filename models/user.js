@@ -8,12 +8,18 @@ const userSchema = Schema({
   name: { type: String, required: true },
   lastname: { type: String, required: true },
   email: {type: String, lowercase: true, required: [true, "can't be blank"], match: [/\S+@\S+\.\S+/, 'is invalid'], index: true, unique: true},
+  username: { type: String },  
   phone: { type: String },  
   salt: { type: String },
   facebookId: { type: String },
   googleId: { type: String },
   password: { type: String },
   roleId:  { type: String, required: true },
+  openOrder: { 
+    orderId: { type: Number, required: true },
+    tableNumber: { type: Number, required: true },
+    created: {type: Date, required: true}
+  }
 }, {timestamps: true});
 
 userSchema.pre('save', function (next) {

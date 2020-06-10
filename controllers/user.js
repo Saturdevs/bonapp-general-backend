@@ -11,7 +11,8 @@ async function signUp(req, res) {
       lastname: req.body.lastname,
       email: req.body.email,
       password: req.body.password,
-      roleId: req.body.roleId
+      roleId: req.body.roleId,
+      username: req.body.email
     })
 
     let userSaved = await UserService.create(user);
@@ -64,13 +65,21 @@ async function signInWithoutPass(req, res) {
 }
 
 function getUser(req, res, next) {
-  User.findById(req.payload.id, (err, user) => {
-    if (!user) {
-      return res.status(401)
+  try{
+    if(!req.params.userId){
+      return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ errors: { userId: 'No puede estar vacío' } })
     }
+    let user = await UserService.findByIdAndRetrieveToken(req.params.userId);
 
-    return res.status(200).send({ user: user.toAuthJSON() })
-  }).catch(next)
+    if (user) {
+      return res.status(HttpStatus.OK).send({ user: user });
+    } else {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Usuario Incorrecto' });
+    }
+  }
+  catch{
+
+  }
 }
 
 function getUserByEmail(req, res, next) {

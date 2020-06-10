@@ -15,6 +15,16 @@ async function getUserById(userId) {
   }
 }
 
+async function getById(userId) {
+  try {
+    let user = await User.findById(userId);
+    return user;
+  }
+  catch (err) {
+    handleUserError(err);
+  }
+}
+
 /**
  * @description Recupera el usuario que cumpla con la query dada como parámetro. Si hay mas de uno devuelve 
  * el primero encuentra.
@@ -79,5 +89,6 @@ module.exports = {
   getUserById,
   getUserByQuery,
   save,
-  remove
+  remove,
+  getById
 }
