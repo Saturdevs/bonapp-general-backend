@@ -16,7 +16,7 @@ const userSchema = Schema({
   password: { type: String },
   roleId:  { type: String, required: true },
   openOrder: { 
-    orderId: { type: Number, required: true },
+    orderId: { type: String, required: true },
     tableNumber: { type: Number, required: true },
     created: {type: Date, required: true}
   }
