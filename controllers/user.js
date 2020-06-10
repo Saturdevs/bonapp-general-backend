@@ -109,7 +109,7 @@ function updateUser(req, res) {
   User.findByIdAndUpdate(userId, bodyUpdate, (err, userUpdated) => {
     if (err) return res.status(500).send({ message: `Error al querer actualizar los datos del usuario: ${err}` })
 
-    res.status(200).send({ user: userUpdated.toAuthJSON() })
+    res.status(200).send({ user: userUpdated })
   })
 
 }
