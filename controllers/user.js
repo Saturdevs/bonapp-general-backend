@@ -68,7 +68,7 @@ function getUser(req, res, next) {
   try{
     if(!req.params.userId){
       return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ errors: { userId: 'No puede estar vacío' } })
-    }
+    } 
     let user = await UserService.findByIdAndRetrieveToken(req.params.userId);
 
     if (user) {
