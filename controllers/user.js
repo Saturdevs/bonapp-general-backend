@@ -103,7 +103,7 @@ function getUserByEmail(req, res, next) {
 }
 
 function updateUser(req, res) {
-  let userId = req.payload.id
+  let userId = req.body._id
   let bodyUpdate = req.body
 
   User.findByIdAndUpdate(userId, bodyUpdate, (err, userUpdated) => {
