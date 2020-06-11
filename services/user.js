@@ -2,6 +2,7 @@
 
 const UserDAO = require('../dataAccess/user');
 const User = require('../models/user');
+const EmailSender = require('../shared/helpers/emailSender');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt-nodejs');
 const moment = require('moment');
@@ -56,7 +57,20 @@ async function generateJWT(user) {
 async function create(userParam) {
   try {
     const user = new User(userParam);
-    return await UserDAO.save(user);
+    const userSaved = await UserDAO.save(user);
+    const token = generateJWT(userSaved);
+
+    //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.
+    const email = {
+      from: 'Bonapp <no-reply@bonapp.com>',
+      to: userSaved.email,
+      subject: 'Verificación de cuenta en BonApp',
+      text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n',
+      html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n'
+    }
+    await EmailSender.sendEmail(email);
+
+    return userSaved;
   } catch (err) {
     throw new Error(err.message);
   }

@@ -6,17 +6,26 @@ const UserService = require('../services/user');
 
 async function signUp(req, res) {
   try {
-    const user = new User({
-      name: req.body.name,
-      lastname: req.body.lastname,
-      email: req.body.email,
-      password: req.body.password,
-      roleId: req.body.roleId
-    })
+    let foundUser = await User.findOne({ email: req.body.email });
+    if (foundUser) {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: 'El email ingresado ya se encuentra asociado a otra cuenta.' })
+    } else {
+      const user = new User({
+        name: req.body.name,
+        lastname: req.body.lastname,
+        email: req.body.email,
+        password: req.body.password,
+        roleId: req.body.roleId,
+        emailVerified: false
+      })
 
-    let userSaved = await UserService.create(user);
+      let userSaved = await UserService.create(user);
 
-    res.status(HttpStatus.OK).send({ user:userSaved, message: 'El usuario ha sido creado correctamente!' });
+      res.status(HttpStatus.OK).send({ 
+        user:userSaved, 
+        message: `Un email de verificación ha sido enviado a la dirección de correo electrónico ${userSaved.email}` 
+      });
+    }
   }
   catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al crear el usuario: ${err.message}` });
@@ -36,7 +45,11 @@ async function signIn(req, res) {
     let user = await UserService.authenticate(req.body);
 
     if (user) {
-      return res.status(HttpStatus.OK).send({ user: user });
+      if (user.emailVerified) {
+        return res.status(HttpStatus.OK).send({ user: user });
+      } else {
+        return res.status(HttpStatus.UNAUTHORIZED).send({ message: 'Tu email no ha sido verificado.' });
+      }
     } else {
       return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Nombre de usuario o contraseña incorrectas' });
     }
@@ -105,11 +118,16 @@ function updateUser(req, res) {
 
 }
 
+async function verificationToken(req, res) {
+  
+}
+
 module.exports = {
   signUp,
   signIn,
   getUser,
   updateUser,
   getUserByEmail,
-  signInWithoutPass
+  signInWithoutPass,
+  verificationToken
 }

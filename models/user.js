@@ -14,6 +14,7 @@ const userSchema = Schema({
   googleId: { type: String },
   password: { type: String },
   roleId:  { type: String, required: true },
+  emailVerified: { type: Boolean, required: true }
 }, {timestamps: true});
 
 userSchema.pre('save', function (next) {
