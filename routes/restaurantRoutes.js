@@ -8,6 +8,7 @@ const passport = require('passport')
 
 restaurantRouter.get('/', restaurantCtrl.getRestaurants)
 restaurantRouter.get('/:restaurantId', restaurantCtrl.getRestaurant)
+restaurantRouter.get('/byRestaurantId/:restaurantId', restaurantCtrl.getByRestaurantId)
 restaurantRouter.post('/', restaurantCtrl.saveRestaurant)
 restaurantRouter.put('/:restaurantId', restaurantCtrl.updateRestaurant)
 restaurantRouter.delete('/:restaurantId', restaurantCtrl.deleteRestaurant)

@@ -12,6 +12,7 @@ userRouter.post('/signinWithoutPass', userCtrl.signInWithoutPass)
 userRouter.post('/resendToken', userCtrl.signInWithoutPass)
 userRouter.get('/verification', userCtrl.verificationToken)
 userRouter.get('/', auth.required, userCtrl.getUser)
+userRouter.get('/:userId', userCtrl.getUser)
 userRouter.get('/userByEmal/:email', userCtrl.getUserByEmail)
 userRouter.put('/', userCtrl.updateUser)
 

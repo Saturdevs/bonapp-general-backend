@@ -22,6 +22,17 @@ function getRestaurant (req, res) {
   })
 }
 
+function getByRestaurantId (req, res) {
+  let restaurantId = req.params.restaurantId
+
+  Restaurant.find({restaurantId: restaurantId}, (err, restaurant) => {
+    if (err) return res.status(500).send({ message: `Error al realizar la petición al servidor ${err}`})
+    if (!restaurant) return res.status(404).send({ message: `El bar ${restaurantId} no existe`})
+
+    res.status(200).send({ restaurant }) //Cuando la clave y el valor son iguales
+  })
+}
+
 function saveRestaurant (req, res) {
   console.log('POST /api/restaurant')
   console.log(req.body)
@@ -69,5 +80,6 @@ module.exports = {
   getRestaurants,
   saveRestaurant,
   updateRestaurant,
-  deleteRestaurant
+  deleteRestaurant,
+  getByRestaurantId
 }

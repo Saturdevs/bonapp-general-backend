@@ -15,6 +15,16 @@ async function getUserById(userId) {
   }
 }
 
+async function getById(userId) {
+  try {
+    let user = await User.findById(userId);
+    return user;
+  }
+  catch (err) {
+    handleUserError(err);
+  }
+}
+
 /**
  * @description Recupera el usuario que cumpla con la query dada como parámetro. Si hay mas de uno devuelve 
  * el primero encuentra.
@@ -39,7 +49,8 @@ async function save(user) {
     if (user === null || user === undefined) {
       throw new Error('El usuario que se quiere guardar en la base de datos no puede ser nulo');
     }
-
+    
+    console.log("save => user:", user);
     return await user.save();
   } catch (err) {
     handleUserError(err);
@@ -79,5 +90,6 @@ module.exports = {
   getUserById,
   getUserByQuery,
   save,
-  remove
+  remove,
+  getById
 }

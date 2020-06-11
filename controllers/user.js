@@ -28,6 +28,7 @@ async function signUp(req, res) {
     }
   }
   catch (err) {
+    console.log("singup => error:", err);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al crear el usuario: ${err.message}` });
   }
 }
@@ -76,14 +77,22 @@ async function signInWithoutPass(req, res) {
   }
 }
 
-function getUser(req, res, next) {
-  User.findById(req.payload.id, (err, user) => {
-    if (!user) {
-      return res.status(401)
-    }
+async function getUser(req, res, next) {
+  try{
+    if(!req.params.userId){
+      return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ errors: { userId: 'No puede estar vacío' } })
+    } 
+    let user = await UserService.findByIdAndRetrieveToken(req.params.userId);
 
-    return res.status(200).send({ user: user.toAuthJSON() })
-  }).catch(next)
+    if (user) {
+      return res.status(HttpStatus.OK).send({ user: user });
+    } else {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Usuario Incorrecto' });
+    }
+  }
+  catch{
+
+  }
 }
 
 function getUserByEmail(req, res, next) {
@@ -107,13 +116,13 @@ function getUserByEmail(req, res, next) {
 }
 
 function updateUser(req, res) {
-  let userId = req.payload.id
+  let userId = req.body._id
   let bodyUpdate = req.body
 
   User.findByIdAndUpdate(userId, bodyUpdate, (err, userUpdated) => {
     if (err) return res.status(500).send({ message: `Error al querer actualizar los datos del usuario: ${err}` })
 
-    res.status(200).send({ user: userUpdated.toAuthJSON() })
+    res.status(200).send({ user: userUpdated })
   })
 
 }
