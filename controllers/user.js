@@ -12,8 +12,7 @@ async function signUp(req, res) {
       email: req.body.email,
       password: req.body.password,
       roleId: req.body.roleId,
-      username: req.body.email,
-      openOrder: null
+      username: req.body.email
     })
     console.log("singup => user:", user);
 
