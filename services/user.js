@@ -69,6 +69,7 @@ async function findByIdAndRetrieveToken(userId){
 async function create(userParam) {
   try {
     const user = new User(userParam);
+    console.log("create => user:", user);
     return await UserDAO.save(user);
   } catch (err) {
     throw new Error(err.message);

@@ -49,7 +49,8 @@ async function save(user) {
     if (user === null || user === undefined) {
       throw new Error('El usuario que se quiere guardar en la base de datos no puede ser nulo');
     }
-
+    
+    console.log("save => user:", user);
     return await user.save();
   } catch (err) {
     handleUserError(err);

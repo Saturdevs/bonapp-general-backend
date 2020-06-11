@@ -14,12 +14,14 @@ async function signUp(req, res) {
       roleId: req.body.roleId,
       username: req.body.email
     })
+    console.log("singup => user:", user);
 
     let userSaved = await UserService.create(user);
 
     res.status(HttpStatus.OK).send({ user:userSaved, message: 'El usuario ha sido creado correctamente!' });
   }
   catch (err) {
+    console.log("singup => error:", err);
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al crear el usuario: ${err.message}` });
   }
 }
