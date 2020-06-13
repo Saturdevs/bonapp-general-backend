@@ -69,7 +69,7 @@ async function findByIdAndRetrieveToken(userId) {
  */
 async function create(userParam) {
   try {
-    const emailVerified;
+    let emailVerified;
     let facebookId = null;
     let googleId = null;
     let email = null;
