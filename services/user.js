@@ -86,7 +86,7 @@ async function create(userParam) {
       //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.
       email = {
         from: 'Bonapp <no-reply@bonapp.com>',
-        to: userSaved.email,
+        to: userParam.email,
         subject: 'Verificación de cuenta en BonApp',
         text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n',
         html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n'
