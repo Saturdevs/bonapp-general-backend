@@ -67,7 +67,7 @@ async function findByIdAndRetrieveToken(userId) {
  * @description Crea un nuevo usuario y lo guarda en la base de datos.
  * @param {JSON} userParam datos con los que se va a crear el nuevo usuario.
  */
-async function create(userParam) {
+async function create(userParam, urlSendEmail = null) {
   try {
     let emailVerified;
     let facebookId = null;
@@ -82,15 +82,7 @@ async function create(userParam) {
       if (!userParam.password || userParam.password === null && userParam.password === undefined) {
         throw new Error(`Debe ingresar una contraseña.`);
       }
-      emailVerified = false;
-      //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.
-      email = {
-        from: 'Bonapp <no-reply@bonapp.com>',
-        to: userParam.email,
-        subject: 'Verificación de cuenta en BonApp',
-        text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n',
-        html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n'
-      }
+      emailVerified = false;      
     }
 
     const user = new User({
@@ -105,8 +97,15 @@ async function create(userParam) {
     });
     const userSaved = await UserDAO.save(user);
     const token = generateJWT(userSaved);
-    if (email !== null) {
-      await EmailSender.sendEmail(email);
+    if (userSaved.facebookId !== null && userSaved.googleId !== null && urlSendEmail !== null) {
+      //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.      
+      await EmailSender.sendEmail({
+        from: 'Bonapp <no-reply@bonapp.com>',
+        to: userParam.email,
+        subject: 'Verificación de cuenta en BonApp',
+        text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/verification\/' + token + '.\n',
+        html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/verification\/' + token + '.\n'
+      });
     }
 
     return userSaved;

@@ -11,7 +11,7 @@ async function signUp(req, res) {
       return res.status(HttpStatus.BAD_REQUEST).send({ message: 'El email ingresado ya se encuentra asociado a otra cuenta.' })
     } else {  
 
-      let userSaved = await UserService.create(req.body);
+      let userSaved = await UserService.create(req.body, req.headers.host);
 
       res.status(HttpStatus.OK).send({
         user: userSaved,
