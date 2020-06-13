@@ -96,7 +96,7 @@ async function create(userParam, urlSendEmail = null) {
       googleId: googleId
     });
     const userSaved = await UserDAO.save(user);
-    const token = generateJWT(userSaved);
+    const token = await generateJWT(userSaved);
     if (userSaved.facebookId === null && userSaved.googleId === null && urlSendEmail !== null) {
       //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.      
       await EmailSender.sendEmail({
