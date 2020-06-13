@@ -10,20 +10,30 @@ async function signUp(req, res) {
     if (foundUser) {
       return res.status(HttpStatus.BAD_REQUEST).send({ message: 'El email ingresado ya se encuentra asociado a otra cuenta.' })
     } else {
+      const emailVerified;
+      if ((req.body.googleId && req.body.googleId !== null && req.body.googleId !== undefined)
+        || (req.body.facebookId && req.body.facebookId !== null && req.body.facebookId !== undefined)) {
+        emailVerified = true;
+      } else {
+        if (!req.body.password || req.body.password === null && req.body.password === undefined) {
+          return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Debe ingresar una contraseña.` });
+        }
+        emailVerified = false;
+      }
       const user = new User({
         name: req.body.name,
         lastname: req.body.lastname,
         email: req.body.email,
         password: req.body.password,
         roleId: req.body.roleId,
-        emailVerified: false
+        emailVerified: emailVerified
       })
 
       let userSaved = await UserService.create(user);
 
-      res.status(HttpStatus.OK).send({ 
-        user:userSaved, 
-        message: `Un email de verificación ha sido enviado a la dirección de correo electrónico ${userSaved.email}` 
+      res.status(HttpStatus.OK).send({
+        user: userSaved,
+        message: `Un email de verificación ha sido enviado a la dirección de correo electrónico ${userSaved.email}`
       });
     }
   }
@@ -78,10 +88,10 @@ async function signInWithoutPass(req, res) {
 }
 
 async function getUser(req, res, next) {
-  try{
-    if(!req.params.userId){
+  try {
+    if (!req.params.userId) {
       return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ errors: { userId: 'No puede estar vacío' } })
-    } 
+    }
     let user = await UserService.findByIdAndRetrieveToken(req.params.userId);
 
     if (user) {
@@ -98,17 +108,17 @@ async function getUser(req, res, next) {
 function getUserByEmail(req, res, next) {
   try {
     User.find({ email: req.params.email }, async (err, user) => {
-    if(user.length > 0){
-      let userAuth = await UserService.authenticateWithoutPass(user[0].email)  
+      if (user.length > 0) {
+        let userAuth = await UserService.authenticateWithoutPass(user[0].email)
         if (userAuth) {
           return res.status(HttpStatus.OK).send({ user: userAuth });
         } else {
           return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Nombre de usuario o contraseña incorrectas' });
         }
-    }
-    else{
-      return res.status(HttpStatus.OK).send({ user: null });      
-    }
+      }
+      else {
+        return res.status(HttpStatus.OK).send({ user: null });
+      }
     });
   } catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error al querer iniciar sesión: ${err.message}` });
@@ -128,7 +138,7 @@ function updateUser(req, res) {
 }
 
 async function verificationToken(req, res) {
-  
+
 }
 
 module.exports = {
