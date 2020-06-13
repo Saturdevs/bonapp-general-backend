@@ -9,7 +9,7 @@ const moment = require('moment');
 const config = require('../config');
 
 async function authenticate({ email, password }) {
-  let query = { email: email };    
+  let query = { email: email };
   const user = await UserDAO.getUserByQuery(query);
   if (user && bcrypt.compareSync(password, user.password)) {
     const { password, ...userWithoutHash } = user.toObject();
@@ -23,10 +23,10 @@ async function authenticate({ email, password }) {
 
 
 async function authenticateWithoutPass(email) {
-  let query = { email: email };    
+  let query = { email: email };
   const user = await UserDAO.getUserByQuery(query);
   if (user) {
-    const {...userWithoutHash } = user.toObject();
+    const { ...userWithoutHash } = user.toObject();
     const token = await generateJWT(user);
     return {
       ...userWithoutHash,
@@ -50,11 +50,11 @@ async function generateJWT(user) {
   return jwt.sign(payload, config.SECRET_TOKEN)
 }
 
-async function findByIdAndRetrieveToken(userId){
+async function findByIdAndRetrieveToken(userId) {
   const user = await UserDAO.getById(userId);
-  
-  if(user){
-    const {...userWithoutHash } = user.toObject();
+
+  if (user) {
+    const { ...userWithoutHash } = user.toObject();
     const token = await generateJWT(user);
     return {
       ...userWithoutHash,
@@ -69,19 +69,45 @@ async function findByIdAndRetrieveToken(userId){
  */
 async function create(userParam) {
   try {
-    const user = new User(userParam);
+    const emailVerified;
+    let facebookId = null;
+    let googleId = null;
+    let email = null;
+    if ((userParam.googleId && userParam.googleId !== null && userParam.googleId !== undefined)
+      || (userParam.facebookId && userParam.facebookId !== null && userParam.facebookId !== undefined)) {
+      emailVerified = true;
+      facebookId = userParam.facebookId ? userParam.facebookId : null;
+      googleId = userParam.googleId ? userParam.googleId : null;
+    } else {
+      if (!userParam.password || userParam.password === null && userParam.password === undefined) {
+        throw new Error(`Debe ingresar una contraseña.`);
+      }
+      emailVerified = false;
+      //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.
+      email = {
+        from: 'Bonapp <no-reply@bonapp.com>',
+        to: userSaved.email,
+        subject: 'Verificación de cuenta en BonApp',
+        text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n',
+        html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n'
+      }
+    }
+
+    const user = new User({
+      name: userParam.name,
+      lastname: userParam.lastname,
+      email: userParam.email,
+      password: userParam.password,
+      roleId: userParam.roleId,
+      emailVerified: emailVerified,
+      facebookId: facebookId,
+      googleId: googleId
+    });
     const userSaved = await UserDAO.save(user);
     const token = generateJWT(userSaved);
-
-    //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.
-    const email = {
-      from: 'Bonapp <no-reply@bonapp.com>',
-      to: userSaved.email,
-      subject: 'Verificación de cuenta en BonApp',
-      text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n',
-      html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + req.headers.host + '\/verification\/' + token + '.\n'
+    if (email !== null) {
+      await EmailSender.sendEmail(email);
     }
-    await EmailSender.sendEmail(email);
 
     return userSaved;
   } catch (err) {

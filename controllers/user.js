@@ -9,27 +9,9 @@ async function signUp(req, res) {
     let foundUser = await User.findOne({ email: req.body.email });
     if (foundUser) {
       return res.status(HttpStatus.BAD_REQUEST).send({ message: 'El email ingresado ya se encuentra asociado a otra cuenta.' })
-    } else {
-      const emailVerified;
-      if ((req.body.googleId && req.body.googleId !== null && req.body.googleId !== undefined)
-        || (req.body.facebookId && req.body.facebookId !== null && req.body.facebookId !== undefined)) {
-        emailVerified = true;
-      } else {
-        if (!req.body.password || req.body.password === null && req.body.password === undefined) {
-          return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Debe ingresar una contraseña.` });
-        }
-        emailVerified = false;
-      }
-      const user = new User({
-        name: req.body.name,
-        lastname: req.body.lastname,
-        email: req.body.email,
-        password: req.body.password,
-        roleId: req.body.roleId,
-        emailVerified: emailVerified
-      })
+    } else {  
 
-      let userSaved = await UserService.create(user);
+      let userSaved = await UserService.create(req.body);
 
       res.status(HttpStatus.OK).send({
         user: userSaved,
