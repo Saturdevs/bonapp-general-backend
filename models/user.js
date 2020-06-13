@@ -19,7 +19,8 @@ const userSchema = Schema({
   openOrder: { 
     orderId: { type: String },
     tableNumber: { type: Number },
-    created: {type: String }
+    created: {type: String },
+    restaurantId: {type: String }
   }
 }, {timestamps: true});
 
