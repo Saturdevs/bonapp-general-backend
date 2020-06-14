@@ -113,16 +113,17 @@ async function sendVerificationEmail(user, urlSendEmail) {
     from: 'Bonapp <no-reply@bonapp.com>',
     to: user.email,
     subject: 'Verificación de cuenta en BonApp',
-    text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/verification\/' + token + '.\n',
-    html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/verification\/' + token + '.\n'
+    text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/api/user/verification\/' + token + '.\n',
+    html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/api/user/verification\/' + token + '.\n'
   });
 }
 
 function accountVerification(token) {
   try {
+    const decodedToken = jwt.verify(token, config.SECRET_TOKEN);
     let message;
-    if (token.iat.add(12, 'hours').unix() < moment().unix()) {
-      const user = UserDAO.getUserById(token.sub);
+    if (decodedToken.iat.add(12, 'hours').unix() < moment().unix()) {
+      const user = UserDAO.getUserById(decodedToken.sub);
       if (user) {
         if (user.emailVerified) {
           message = `Este email ya ha sido verificado.`;

@@ -8,7 +8,7 @@ const userSchema = Schema({
   name: { type: String, required: true },
   lastname: { type: String, required: true },
   email: {type: String, lowercase: true, required: [true, "can't be blank"], match: [/\S+@\S+\.\S+/, 'is invalid'], index: true, unique: true},
-  username: { type: String },  
+  username: { type: String, required: true, unique: true },  
   phone: { type: String },  
   salt: { type: String },
   facebookId: { type: String },
