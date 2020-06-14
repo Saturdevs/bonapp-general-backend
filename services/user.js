@@ -118,17 +118,17 @@ async function sendVerificationEmail(user, urlSendEmail) {
   });
 }
 
-function accountVerification(token) {
+async function accountVerification(token) {
   try {
     const decodedToken = jwt.verify(token, config.SECRET_TOKEN);
     let message;
     if (decodedToken.iat.add(12, 'hours').unix() < moment().unix()) {
-      const user = UserDAO.getUserById(decodedToken.sub);
+      const user = await UserDAO.getUserById(decodedToken.sub);
       if (user) {
         if (user.emailVerified) {
           message = `Este email ya ha sido verificado.`;
         } else {
-          UserDAO.updateUserById(user._id, { emailVerified: true })
+          await UserDAO.updateUserById(user._id, { emailVerified: true })
           message = `La cuenta ha sido verificado, ya puede iniciar sesión.`;
         }
       } else {
@@ -137,7 +137,7 @@ function accountVerification(token) {
     } else {
       message = `Su token ha expirado. Debe registrarse nuevamente.`;
     }    
-  } catch (error) {
+  } catch (err) {
     throw new Error(err.message);
   }  
 }
