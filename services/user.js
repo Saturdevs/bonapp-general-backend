@@ -120,7 +120,7 @@ async function sendVerificationEmail(user, urlSendEmail) {
 
 async function accountVerification(token) {
   try {
-    const decodedToken = jwt.verify(token, config.SECRET_TOKEN);
+    const decodedToken = JSON.parse(JSON.stringify(jwt.verify(token, config.SECRET_TOKEN)));
     console.log('decodedToke: ' + decodedToken);
     let message;
     if (decodedToken.iat.add(12, 'hours').unix() < moment().unix()) {
