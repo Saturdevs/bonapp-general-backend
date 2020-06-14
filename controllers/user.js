@@ -6,18 +6,21 @@ const UserService = require('../services/user');
 
 async function signUp(req, res) {
   try {
-    let foundUser = await User.findOne({ email: req.body.email });
-    if (foundUser) {
-      return res.status(HttpStatus.BAD_REQUEST).send({ message: 'El email ingresado ya se encuentra asociado a otra cuenta.' })
-    } else {  
-
-      let userSaved = await UserService.create(req.body, req.headers.host);
-
-      res.status(HttpStatus.OK).send({
-        user: userSaved,
-        message: `Un email de verificación ha sido enviado a la dirección de correo electrónico ${userSaved.email}`
-      });
+    let user = await User.findOne({ email: req.body.email });
+    if (user) {
+      if (user.emailVerified) {
+        return res.status(HttpStatus.BAD_REQUEST).send({ message: 'El email ingresado ya se encuentra asociado a otra cuenta.' })
+      } else {
+        await UserService.sendVerificationEmail(user, req.headers.host);
+      }
+    } else {
+      user = await UserService.create(req.body, req.headers.host)
     }
+
+    res.status(HttpStatus.OK).send({
+      user: user,
+      message: `Un email de verificación ha sido enviado a la dirección de correo electrónico ${user.email}`
+    });
   }
   catch (err) {
     console.log("singup => error:", err);
@@ -120,7 +123,11 @@ function updateUser(req, res) {
 }
 
 async function verificationToken(req, res) {
-
+  try {
+    UserService.accountVerification(req.user);
+  } catch (error) {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error durante la verificación del email: ${err.message}` });
+  }
 }
 
 module.exports = {

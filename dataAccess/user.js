@@ -74,6 +74,25 @@ async function remove(user, opts = {}) {
   }
 }
 
+/**
+ * Updetea el usuario en la base de datos segun el id dado.
+ * @param {ObjectID} userId 
+ * @param {JSON} bodyUpdate 
+ * @param {JSON} opts
+ */
+async function updateUserById(userId, bodyUpdate, opts = {}) {
+  try {
+    if (userId === null || userId === undefined) {
+      throw new Error('El id del usuario a actualizar no puede ser nulo');
+    }
+
+    let userUpdated = await User.findByIdAndUpdate(userId, bodyUpdate, opts);
+    return userUpdated;
+  } catch (err) {
+    handleUserError(err);
+  }
+}
+
 function handleUserError(err) {
   if (err.code === 11000) {
     if (err.keyPattern.email !== null && err.keyPattern.email !== undefined) {
@@ -91,5 +110,6 @@ module.exports = {
   getUserByQuery,
   save,
   remove,
-  getById
+  getById,
+  updateUserById
 }

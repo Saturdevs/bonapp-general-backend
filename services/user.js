@@ -71,8 +71,7 @@ async function create(userParam, urlSendEmail = null) {
   try {
     let emailVerified;
     let facebookId = null;
-    let googleId = null;
-    let email = null;
+    let googleId = null;    
     if ((userParam.googleId && userParam.googleId !== null && userParam.googleId !== undefined)
       || (userParam.facebookId && userParam.facebookId !== null && userParam.facebookId !== undefined)) {
       emailVerified = true;
@@ -96,22 +95,50 @@ async function create(userParam, urlSendEmail = null) {
       googleId: googleId
     });
     const userSaved = await UserDAO.save(user);
-    const token = await generateJWT(userSaved);
+    
     if (userSaved.facebookId === null && userSaved.googleId === null && urlSendEmail !== null) {
-      //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.      
-      await EmailSender.sendEmail({
-        from: 'Bonapp <no-reply@bonapp.com>',
-        to: userParam.email,
-        subject: 'Verificación de cuenta en BonApp',
-        text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/verification\/' + token + '.\n',
-        html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/verification\/' + token + '.\n'
-      });
+      await sendVerificationEmail(userSaved, urlSendEmail);
     }
 
     return userSaved;
   } catch (err) {
     throw new Error(err.message);
   }
+}
+
+async function sendVerificationEmail(user, urlSendEmail) {
+  const token = await generateJWT(user);
+  //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.      
+  await EmailSender.sendEmail({
+    from: 'Bonapp <no-reply@bonapp.com>',
+    to: user.email,
+    subject: 'Verificación de cuenta en BonApp',
+    text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/verification\/' + token + '.\n',
+    html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/verification\/' + token + '.\n'
+  });
+}
+
+function accountVerification(token) {
+  try {
+    let message;
+    if (token.iat.add(12, 'hours').unix() < moment().unix()) {
+      const user = UserDAO.getUserById(token.sub);
+      if (user) {
+        if (user.emailVerified) {
+          message = `Este email ya ha sido verificado.`;
+        } else {
+          UserDAO.updateUserById(user._id, { emailVerified: true })
+          message = `La cuenta ha sido verificado, ya puede iniciar sesión.`;
+        }
+      } else {
+        message = `No se ha encontrado ningún usuario para el token.`;
+      }
+    } else {
+      message = `Su token ha expirado. Debe registrarse nuevamente.`;
+    }    
+  } catch (error) {
+    throw new Error(err.message);
+  }  
 }
 
 /**
@@ -131,5 +158,7 @@ module.exports = {
   create,
   deleteUser,
   authenticateWithoutPass,
-  findByIdAndRetrieveToken
+  findByIdAndRetrieveToken,
+  accountVerification,
+  sendVerificationEmail
 }
