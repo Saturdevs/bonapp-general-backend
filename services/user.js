@@ -120,10 +120,9 @@ async function sendVerificationEmail(user, urlSendEmail) {
 
 async function accountVerification(token) {
   try {
-    const decodedToken = JSON.parse(JSON.stringify(jwt.verify(token, config.SECRET_TOKEN)));
-    console.log('decodedToke: ' + decodedToken);
+    const decodedToken = jwt.verify(token, config.SECRET_TOKEN);    
     let message;
-    if (decodedToken.iat.add(12, 'hours').unix() < moment().unix()) {
+    if (moment().unix() < moment(decodedToken.iat).add(12, 'hours').unix()) {
       const user = await UserDAO.getUserById(decodedToken.sub);
       if (user) {
         if (user.emailVerified) {
