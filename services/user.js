@@ -123,7 +123,7 @@ async function accountVerification(token) {
   try {
     const decodedToken = jwt.verify(token, config.SECRET_TOKEN);    
     let response;
-    if (moment().unix() < moment(decodedToken.iat).add(12, 'hours').unix()) {
+    if (decodedToken.iat > moment().subtract(12, 'hours').unix()) {
       const user = await UserDAO.getUserById(decodedToken.sub);
       if (user) {
         if (user.emailVerified) {
