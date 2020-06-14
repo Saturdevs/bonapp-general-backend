@@ -125,8 +125,8 @@ function updateUser(req, res) {
 async function verificationToken(req, res) {
   try {
     const token = req.params.token;
-    const message = await UserService.accountVerification(token);
-    res.status(HttpStatus.OK).send({ message: message });
+    const response = await UserService.accountVerification(token);
+    res.status(response.status).send({ message: response.message });
   } catch (err) {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error durante la verificación del email: ${err.message}` });
   }

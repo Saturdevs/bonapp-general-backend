@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt-nodejs');
 const moment = require('moment');
 const config = require('../config');
+const HttpStatus = require('http-status-codes');
 
 async function authenticate({ email, password }) {
   let query = { email: email };
@@ -121,32 +122,36 @@ async function sendVerificationEmail(user, urlSendEmail) {
 async function accountVerification(token) {
   try {
     const decodedToken = jwt.verify(token, config.SECRET_TOKEN);    
-    let message;
-    console.log("ANTES DEL IF PARA CHECKEAR SI EL TOKEN EXPIRO")
+    let response;
     if (moment().unix() < moment(decodedToken.iat).add(12, 'hours').unix()) {
-      console.log("ADENTRO DEL IF PARA CHECKEAR SI EL TOKEN EXPIRO")
       const user = await UserDAO.getUserById(decodedToken.sub);
-      console.log("USER: " + user)
       if (user) {
-        console.log("ENCONTRO USER")
         if (user.emailVerified) {
-          console.log("EMAIL YA VERIFICADO")
-          message = `Este email ya ha sido verificado.`;
+          response = {
+            status: HttpStatus.BAD_REQUEST,
+            message: `Este email ya ha sido verificado.`
+          };
         } else {
-          console.log("EMAIL NO VERIFICADO. UPDATE USER")
-          await UserDAO.updateUserById(user._id, { emailVerified: true })
-          console.log("DESPUES DE UPDETEAR USER")
-          message = `La cuenta ha sido verificado, ya puede iniciar sesión.`;
+          await UserDAO.updateUserById(user._id, { emailVerified: true });
+          response = {
+            status: HttpStatus.BAD_REQUEST,
+            message: `La cuenta ha sido verificado, ya puede iniciar sesión.`
+          };          
         }
       } else {
-        console.log("NO ENCONTRO USER")
-        message = `No se ha encontrado ningún usuario para el token.`;
+        response = {
+          status: HttpStatus.BAD_REQUEST,
+          message: `No se ha encontrado ningún usuario para el token.`
+        };        
       }
     } else {
-      console.log("TOKEN EXPIRO")
-      message = `Su token ha expirado. Debe registrarse nuevamente.`;
-    }    
-    console.log("MESSAGE: " + message)
+      response = {
+        status: HttpStatus.BAD_REQUEST,
+        message: `Su token ha expirado. Debe registrarse nuevamente.`
+      };
+    }  
+    
+    return response;
   } catch (err) {
     throw new Error(err.message);
   }  
