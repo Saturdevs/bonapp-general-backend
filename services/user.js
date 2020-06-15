@@ -89,6 +89,7 @@ async function create(userParam, urlSendEmail = null) {
       name: userParam.name,
       lastname: userParam.lastname,
       email: userParam.email,
+      username: userParam.email,
       password: userParam.password,
       roleId: userParam.roleId,
       emailVerified: emailVerified,
