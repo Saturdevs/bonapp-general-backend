@@ -111,6 +111,8 @@ function getUserByEmail(req, res, next) {
 }
 
 function updateUser(req, res) {
+  console.log("UpdateUser req: =>",req);
+  
   let userId = req.body._id
   let bodyUpdate = req.body
 
