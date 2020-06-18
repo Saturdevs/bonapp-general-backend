@@ -136,6 +136,8 @@ async function verificationToken(req, res) {
 
 async function deleteOpenOrder(req, res){
   try {
+    console.log("userCtrl - deleteOpenOrder => ",req);
+    
     if (!req.params.userId) {
       return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ errors: { userId: 'No puede estar vacío' } })
     }

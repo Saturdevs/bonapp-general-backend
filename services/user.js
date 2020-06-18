@@ -123,6 +123,7 @@ async function sendVerificationEmail(user, urlSendEmail) {
 async function deleteOpenOrderByUserId(userId) {
   try {
     const user = await UserDAO.updateUserById(userId, { openOrder: null });
+    console.log("orderService - deleteOpenOrderByUserId =>", user);
     return user;
   } catch (error) {
     throw new Error(err.message);
