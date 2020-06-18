@@ -12,5 +12,6 @@ userRouter.get('/', userCtrl.getUser);
 userRouter.get('/:userId', userCtrl.getUser);
 userRouter.get('/userByEmal/:email', userCtrl.getUserByEmail);
 userRouter.put('/', userCtrl.updateUser);
+userRouter.put('/deleteOpenOrder/:userId', userCtrl.deleteOpenOrder);
 
 module.exports = userRouter;

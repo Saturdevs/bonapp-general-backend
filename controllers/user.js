@@ -134,6 +134,24 @@ async function verificationToken(req, res) {
   }
 }
 
+async function deleteOpenOrder(req, res){
+  try {
+    if (!req.params.userId) {
+      return res.status(HttpStatus.UNPROCESSABLE_ENTITY).send({ errors: { userId: 'No puede estar vacío' } })
+    }
+    let user = await UserService.deleteOpenOrderByUserId(req.params.userId);
+
+    if (user) {
+      return res.status(HttpStatus.OK).send({ user: user });
+    } else {
+      return res.status(HttpStatus.BAD_REQUEST).send({ message: 'Usuario Incorrecto' });
+    }
+  }
+  catch (err){
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send({ message: `Error durante la actualizacion del usuario: ${err.message}` });
+  }
+}
+
 module.exports = {
   signUp,
   signIn,
@@ -141,5 +159,6 @@ module.exports = {
   updateUser,
   getUserByEmail,
   signInWithoutPass,
-  verificationToken
+  verificationToken,
+  deleteOpenOrder
 }
