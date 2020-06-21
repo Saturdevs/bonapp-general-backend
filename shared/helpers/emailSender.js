@@ -14,7 +14,7 @@ async function sendEmail(email) {
 
     // create reusable transporter object using the default SMTP transport
     let transporter = nodemailer.createTransport({
-      host: "smtp.bonapp.com.ar",
+      host: "mail.bonapp.com.ar",
       port: 465,
       secure: true, // true for 465, false for other ports
       auth: {
