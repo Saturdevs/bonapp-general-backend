@@ -72,7 +72,7 @@ async function create(userParam, urlSendEmail = null) {
   try {
     let emailVerified;
     let facebookId = null;
-    let googleId = null;    
+    let googleId = null;
     if ((userParam.googleId && userParam.googleId !== null && userParam.googleId !== undefined)
       || (userParam.facebookId && userParam.facebookId !== null && userParam.facebookId !== undefined)) {
       emailVerified = true;
@@ -82,13 +82,14 @@ async function create(userParam, urlSendEmail = null) {
       if (!userParam.password || userParam.password === null && userParam.password === undefined) {
         throw new Error(`Debe ingresar una contraseña.`);
       }
-      emailVerified = false;      
+      emailVerified = false;
     }
 
     const user = new User({
       name: userParam.name,
       lastname: userParam.lastname,
       email: userParam.email,
+      username: userParam.email,
       password: userParam.password,
       roleId: userParam.roleId,
       emailVerified: emailVerified,
@@ -96,7 +97,7 @@ async function create(userParam, urlSendEmail = null) {
       googleId: googleId
     });
     const userSaved = await UserDAO.save(user);
-    
+
     if (userSaved.facebookId === null && userSaved.googleId === null && urlSendEmail !== null) {
       await sendVerificationEmail(userSaved, urlSendEmail);
     }
@@ -119,9 +120,19 @@ async function sendVerificationEmail(user, urlSendEmail) {
   });
 }
 
+async function deleteOpenOrderByUserId(userId) {
+  try {
+    const user = await UserDAO.updateUserById(userId, { openOrder: null });
+    console.log("orderService - deleteOpenOrderByUserId =>", user);
+    return user;
+  } catch (error) {
+    throw new Error(err.message);
+  }
+}
+
 async function accountVerification(token) {
   try {
-    const decodedToken = jwt.verify(token, config.SECRET_TOKEN);    
+    const decodedToken = jwt.verify(token, config.SECRET_TOKEN);
     let response;
     console.log("IAT: " + decodedToken.iat)
     console.log("MOMENT SUBTRACT: " + moment().subtract(12, 'hours').unix())
@@ -138,25 +149,25 @@ async function accountVerification(token) {
           response = {
             status: HttpStatus.BAD_REQUEST,
             message: `La cuenta ha sido verificado, ya puede iniciar sesión.`
-          };          
+          };
         }
       } else {
         response = {
           status: HttpStatus.BAD_REQUEST,
           message: `No se ha encontrado ningún usuario para el token.`
-        };        
+        };
       }
     } else {
       response = {
         status: HttpStatus.BAD_REQUEST,
         message: `Su token ha expirado. Debe registrarse nuevamente.`
       };
-    }  
-    
+    }
+
     return response;
   } catch (err) {
     throw new Error(err.message);
-  }  
+  }
 }
 
 /**
@@ -178,5 +189,6 @@ module.exports = {
   authenticateWithoutPass,
   findByIdAndRetrieveToken,
   accountVerification,
-  sendVerificationEmail
+  sendVerificationEmail,
+  deleteOpenOrderByUserId
 }
