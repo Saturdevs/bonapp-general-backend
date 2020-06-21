@@ -30,7 +30,7 @@ async function sendEmail(email) {
 
     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
   } catch (error) {
-    console.error(error);
+    throw new Error(error);
   }
 }
 
