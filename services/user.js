@@ -109,15 +109,20 @@ async function create(userParam, urlSendEmail = null) {
 }
 
 async function sendVerificationEmail(user, urlSendEmail) {
-  const token = await generateJWT(user);
-  //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.      
-  await EmailSender.sendEmail({
-    from: 'Bonapp <no-reply@bonapp.com>',
-    to: user.email,
-    subject: 'Verificación de cuenta en BonApp',
-    text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/api/user/verification\/' + token + '.\n',
-    html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/api/user/verification\/' + token + '.\n'
-  });
+  try {
+    const token = await generateJWT(user);
+    //TODO: Armar un mail mejor. Ver como añadir imagen de BonApp.      
+    await EmailSender.sendEmail({
+      from: 'Bonapp <no-reply@bonapp.com>',
+      to: user.email,
+      subject: 'Verificación de cuenta en BonApp',
+      text: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/api/user/verification\/' + token + '.\n',
+      html: 'Hola,\n\n' + 'Gracias por registrarte en BonApp! Por favor, confirmá la dirección de correo electónico ingresada durante el registro haciendo click en el siguiente link: \nhttp:\/\/' + urlSendEmail + '\/api/user/verification\/' + token + '.\n'
+    });
+  }
+  catch (err) {
+    throw new Error(err.message);
+  }
 }
 
 async function deleteOpenOrderByUserId(userId) {
